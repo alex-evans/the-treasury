@@ -21,12 +21,11 @@ def main(args):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser = argparse.ArgumentParser(description='Handle Treasury.')
     parser.add_argument('-f', '--filename')
-    parser.add_argument('-l', '--load', action='store_false')
+    parser.add_argument('-l', '--load', action='store_true')
 
     args = parser.parse_args()
 
     main(args)
-    
     
