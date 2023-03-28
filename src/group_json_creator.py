@@ -57,6 +57,31 @@ def load_usbank(csv_reader):
     return bank_data
 
 
+def amex_process_txn_name(full_txn_name):
+    if 'AMAZON' in full_txn_name:
+        return 'AMAZON'
+    
+    if 'STARBUCKS' in full_txn_name:
+        return 'STARBUCKS'
+    
+    if 'T-MOBILE' in full_txn_name:
+        return 'T-MOBILE'
+    
+    if 'YOUTUBE TV' in full_txn_name:
+        return 'YOUTUBE TV'
+    
+    if 'PRIME VIDEO' in full_txn_name:
+        return 'PRIME VIDEO'
+    
+    if 'HOMEDEPOT' in full_txn_name or 'THE HOME DEPOT' in full_txn_name:
+        return 'HOMEDEPOT'
+    
+    if 'DISNEYPLUS' in full_txn_name:
+        return 'DISNEYPLUS'
+    
+    return full_txn_name
+
+
 def load_amex(csv_reader):
     bank_data = []
     line_count = 0
@@ -69,22 +94,7 @@ def load_amex(csv_reader):
         if 'MOBILE PAYMENT' in row['Description']:
             continue
 
-        if 'AMAZON' in row['Description']:
-            name = 'AMAZON'
-        elif 'STARBUCKS' in row['Description']:
-            name = 'STARBUCKS'
-        elif 'T-MOBILE' in row['Description']:
-            name = 'T-MOBILE'
-        elif 'YOUTUBE TV' in row['Description']:
-            name = 'YOUTUBE TV'
-        elif 'PRIME VIDEO' in row['Description']:
-            name = 'PRIME VIDEO'
-        elif 'HOMEDEPOT' in row['Description'] or 'THE HOME DEPOT' in row['Description']:
-            name = 'HOMEDEPOT'
-        elif 'DISNEYPLUS' in row['Description']:
-            name = 'DISNEYPLUS'
-        else:
-            name = row['Description']
+        name = amex_process_txn_name(row['Description'])
 
         if '-' in row['Amount']:
             txn_type = 'CREDIT'

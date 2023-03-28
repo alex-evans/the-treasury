@@ -162,4 +162,4 @@ cython_debug/
 ###############
 raw_data/
 *_group_dict.json
-
+*_group_dict copy.json
