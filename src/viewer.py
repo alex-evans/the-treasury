@@ -9,7 +9,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from models import Transactions
-from models import TxnNames
 
 
 load_dotenv()
@@ -26,12 +25,14 @@ Session = sessionmaker(bind=engine)
 def month_view(year, month):
     session = Session()
 
-    (start_day, end_day) = calendar.monthrange(year, month)
-    start_date = datetime(year, month, start_day)
+    (_, end_day) = calendar.monthrange(year, month)
+    
+    start_date = datetime(year, month, 1)
     end_date = datetime(year, month, end_day)
+    
     months_transactions = session.query(Transactions).filter(Transactions.date.between(start_date, end_date)).all()
 
-    table = Table(title=f'Month View Debits: {start_date} - {end_date}', show_footer=True)
+    table = Table(title=f'Month View Debits: {start_date} - {end_date}')
     table.add_column('Date')
     table.add_column('Group')
     table.add_column('Sub-Group')
@@ -44,9 +45,10 @@ def month_view(year, month):
             amount = txn.amount
         else:
             amount = -abs(txn.amount)
-        table.add_row(str(txn.date), txn.name.sub_group.group.name, txn.name.sub_group.name, txn.name.name, str(amount))
+        
+        table.add_row(str(txn.date), txn.name.group, txn.name.sub_group, txn.name.name, str(amount))
         month_total =+ amount 
-
+        
     console = Console()
     console.print(table)
 

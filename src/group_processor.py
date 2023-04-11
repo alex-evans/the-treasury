@@ -5,9 +5,6 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-
-from models import Groups
-from models import SubGroups
 from models import TxnNames
 
 
@@ -31,43 +28,31 @@ def pull_group_dict_data():
     return credit_dict, debit_dict
 
 
-def update_db(session, group_dict):
+def update_db(session, group_dict, revenue):
+
     for group_item in group_dict:
-        
-        # Group
-        group = group_dict[group_item]['group']
-        db_group = session.query(Groups).filter(Groups.name == group).first()
-        if not db_group:
-            db_group = Groups(
-                        name=group
-                       )
-            session.add(db_group)
-            print('Added Group:', group)
 
-        # Sub Group
-        sub_group = group_dict[group_item]['subGroup']
-        db_sub_group = session.query(SubGroups).filter(SubGroups.name == sub_group).first()
-        if not db_sub_group:
-            db_sub_group = SubGroups(
-                            name=sub_group,
-                            group=db_group
-                           )
-            session.add(db_sub_group)
-            print('Added SubGroup', sub_group)
-        else:
-            db_sub_group.group = db_group
+        group_name = group_dict[group_item]['group']
+        sub_group_name = group_dict[group_item]['subGroup']
 
-        # Txn Name
-        db_txn_name = session.query(TxnNames).filter(TxnNames.name == group_item).first()
-        if not db_txn_name:
-            db_txn_name = TxnNames(
-                            name=group_item,
-                            sub_group=db_sub_group
-                          )
-            session.add(db_txn_name)
-            print('Added TxnName:', group_item)
-        else:
-            db_txn_name.sub_group = db_sub_group
+        db_txn_name = session.query(TxnNames)\
+                             .filter(TxnNames.name == group_item)\
+                             .filter(TxnNames.revenue == revenue)\
+                             .filter(TxnNames.group == group_name)\
+                             .filter(TxnNames.sub_group == sub_group_name)\
+                             .first()
+
+        if db_txn_name:
+            continue
+
+        db_txn_name = TxnNames(
+                        name=group_item,
+                        group=group_dict[group_item]['group'],
+                        sub_group=group_dict[group_item]['subGroup'],
+                        revenue=revenue                            
+                        )
+        session.add(db_txn_name)
+        print('Added TxnName:', group_item)
 
 
 def save_groups_to_db():
@@ -76,11 +61,11 @@ def save_groups_to_db():
     try:
         credit_dict, debit_dict = pull_group_dict_data()
 
-        update_db(session, credit_dict)
-        update_db(session, debit_dict)
+        update_db(session, credit_dict, revenue=True)
+        update_db(session, debit_dict, revenue=False)
 
         session.commit()
-        
+
     except Exception as e:
         print('Database Failed:', e)
         session.rollback()
